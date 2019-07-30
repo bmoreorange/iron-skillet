@@ -1,0 +1,28 @@
+name: vm50_deletes_rest
+label: Delete profile objects for VM50 reduction
+
+description: |
+  Quick delete of recommended profile objects if IronSkillet loaded on VM50
+
+type: template
+
+extends:
+
+labels:
+  collection:
+    - Configure
+    - PANOS
+    - IronSkillet
+
+variables:
+  - name: confirm
+    description: Delete profiles due to VM-50 limits
+    default: Use the delete commands rendered and paste into the CLI
+    type_hint: text
+
+
+
+snippets:
+# get API key used in additional API calls
+  - name: vm50_deletes_cli
+    file: vm50_deletes_cli.conf
