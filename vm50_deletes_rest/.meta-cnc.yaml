@@ -32,7 +32,9 @@ variables:
 snippets:
 # get API key used in additional API calls
   - name: key_gen
-    path: https://{{ TARGET_IP }}/api/?type=keygen&user={{ TARGET_USERNAME }}&password={{ TARGET_PASSWORD }}
+    path: >-
+      https://{{ TARGET_IP }}/api/?type=keygen
+      &user={{ TARGET_USERNAME }}&password={{ TARGET_PASSWORD }}
     output_type: xml
     outputs:
       - name: api_key
@@ -40,13 +42,10 @@ snippets:
 # delete Internet profile group and associated profiles
   - name: delete_internal_profile_group
     path: >-
-      "https://{{ TARGET_IP }}/api/?type=config&action=delete&xpath=/config/devices/entry[@name='localhost.localdomain']\
-      /vsys/entry[@name='vsys1']/profile-group/entry[@name='Internal']&key={{ api_key }}"
+      https://{{ TARGET_IP }}/api/?type=config&action=delete&xpath=/config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/entry[@name='Internal']&key={{ api_key }}
   - name: delete_internal_profile_virus
     path: >-
-      "https://{{ TARGET_IP }}/api/?type=config&action=delete\
-      &xpath=/config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry[@name='Internal-AV']\
-      &key={{ api_key }}"
+      https://{{ TARGET_IP }}/api/?type=config&action=delete&xpath=/config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry[@name='Internal-AV']&key={{ api_key }}
   - name: delete_internal_profile_spyware
     path: >-
       https://{{ TARGET_IP }}/api/?type=config&action=delete&xpath=/config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/spyware/entry[@name='Internal-AS']&key={{ api_key }}
