@@ -1,0 +1,43 @@
+name: iron_skillet_validation_90_e8d79a34-eabd-11e9-81b4-2a2ae2dbcce4
+label: IronSkillet Validate Device System for panos 9.0
+
+description: |
+ This Skillet validates the device configuration against the IronSkillet Best Practices for Device and System settings
+
+type: pan_validation
+labels:
+ collection: IronSkillet
+ mode: online
+ version_include: 9.0
+ version_exclude:
+ platform_exclude:
+
+snippets:
+
+ - name: show_device_system
+   cmd: show
+   xpath: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system
+   outputs:
+     # capture all the xml elements found at the 'update-schedule' xpath and convert it into a python object
+     - name: update_schedule_object
+       capture_object: update-schedule
+ - name: check_update_schedule
+   message: Update Schedule is Recommended and not currently configured
+   link: http://docs.paloaltonetworks.com/update-schedule-stuff
+   severity: medium
+   when: update_schedule_object is none
+ - name: check_stats_service
+   message: Statistics Service should be configured as described in the docs
+   link: http://docs.paloaltonetworks.com/update-schedule-stuff/stats-service
+   when: update_schedule_object is not none and 'statistics-service' not in update_schedule_object['update-schedule']
+ - name: check_threats
+   message: Threats should be configured!
+   severity: high
+   link: http://docs.paloaltonetworks.com/update-schedule-stuff/threats
+   when: update_schedule_object|missing_config('threats')
+ - name: configure_anti_virus
+   message: Anti-Virus updates should be configured
+   severity: low
+   link: http://docs.paloaltonetworks.com/update-schedule-stuff/anti-virus
+   when: update_schedule_object|missing_config('anti-virus')
+
