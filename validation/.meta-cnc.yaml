@@ -13,10 +13,209 @@ labels:
  platform_exclude:
 
 snippets:
+# this first grouping is based on device/system configuration elements
+# not checking hostname or management IP configuration as part of this validation
+# no remediation elements embedded; just the checks for now
 
+# key issue for larger configs: the xml structure and GUI/doc structure can be very different
+# have to reuse xpaths if wanting to group validations by subject and associated doc links
+
+ - validation: enable telemetry # this is just the name of the validation
+   object: telemetry # naming the object as a reference value
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system/update-schedule/statistics-service
+   checks:
+     - telemetry is configured # this is the 'is null' type of check to see if any content under this xpath
+       fail_message: telemetry is not configured
+        - telemetry.application-reports is yes # using this notation for now to avoid python or code-specific conventions; default check to an element value?
+        - telemetry.threat-prevention-reports is yes # these are children of the 'is configured' test above; just indenting for now as reference
+        - telemetry.threat-prevention-pcap is yes
+        - telemetry.threat-prevention-information is yes
+        - telemetry.passive-dns-monitoring is yes
+        - telemetry.url-reports is yes
+        - telemetry.health-performance-reports is yes
+        - telemetry.file-identification-reports is yes
+   fail_message: telemetry is not fully enabled # if no local fail message then use the validation fail message
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.clo7kayi77hk
+
+ - validation: dynamic updates - antivirus # note that we should use GUI/common wording: dynamic updates vs update-schedule (xml is engineer speak)
+   object: dyn_up_av
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system/update-schedule/anti-virus
+   checks:
+     - dyn_up_av is configured
+       fail_message: anti-virus dynamic updates not configured
+     - dyn_up_av.recurring child is hourly # is a child xpath reference and not a value or attribute; how best to reference this? xml quirks to deal with
+       fail_message: anti-virus dynamic updates should be checked hourly
+     - dyn_up_av..action is download-and-install # using a double dot notation if the tree is value based and you find the child by name
+       fail_message: anti-virus dynamic updates should be downloaded and installed
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.z8qeh5ujjdqn
+
+ - validation: dynamic updates - threats
+   object: dyn_up_threats
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system/update-schedule/threats
+   checks:
+     - dyn_up_threats is configured
+       fail_message: threat dynamic updates not configured
+     - dyn_up_threats.recurring child is every-30-mins
+       fail_message: threat dynamic updates should be checked every 30 minutes
+     - dyn_up_threats.recurring..action is download-and-install # again use double dot to check download-install for any time interval
+       fail_message: threat dynamic updates should be downloaded and installed
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.z8qeh5ujjdqn
+
+ - validation: dynamic updates - wildfire
+   object: dyn_up_wf
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system/update-schedule/wildfire
+   checks:
+     - dyn_up_wf is configured
+       fail_message: wildfire dynamic updates not configured
+     - dyn_up_wf.recurring child is every-min
+       fail_message: wildfire dynamic updates should be checked every minute
+     - dyn_up_threats.recurring..action is download-and-install
+       fail_message: wildfire dynamic updates should be downloaded and installed
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.z8qeh5ujjdqn
+
+ - validation: snmp version
+   object: snmp
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system/snmp-settings
+   checks:
+     - snmp..version child is v3
+       fail_message: snmp should be configured with version 3
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.n012f9a2uix6  
+
+ - validation: dns configured
+   object: dns
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system/dns-settings
+   checks:
+     - dns..primary is configured
+       fail_message: primary dns server is required for the management interface
+     - dns..secondary is configured
+       fail_message: secondary dns server is recommended for the management interface
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.uo567en25r7l
+
+ - validation: ntp configured
+   object: ntp
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system/ntp-servers
+   checks:
+     - ntp.primary-ntp-server.ntp-server-address is configured # can't use a double dot here the way xpath is created for primary and secondary
+       fail_message: primary ntp server shoud be configured
+     - ntp.primary-ntp-server.ntp-server-address is configured
+       fail_message: secondary ntp server should be configured
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.uo567en25r7l
+
+ - validation: login banner configured
+   object: banner
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system/login-banner
+   checks:
+     - banner is configured
+       fail_message: login banner shoud be configured
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.6sx7nmvtzigf
+
+ - validation: UTC timezone
+   object: timezone
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system/timezone
+   checks:
+     - timezone is UTC
+       fail_message: UTC timezone is recommended
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.6sx7nmvtzigf
+
+# this grouping is based on device/setting configuration elements
+
+ - validation: commit lock enabled # this is part of GUI general settings mapped to login banner and UTC above
+   object: commit_lock
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/management/auto-acquire-commit-lock
+   checks:
+     - commit_lock is yes
+   fail_message: Automatically Acquire Commit Lock should be enabled
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.6sx7nmvtzigf
+
+ - validation: strip xff # this and xff userid (below) are under ctd but other non-related items there too; no simple check of 'does it exist'
+   object: strip_xff
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/ctd/strip-x-fwd-for
+   checks:
+     - strip_xff is yes
+   fail_message: strip x-forward-for is not configured
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.8xkuhie49jso
+
+ - validation: use xff in userid # see above; these are 2 items in the same GUI xff checkbox panel
+   object: xff_userid
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/ctd/x-forwarded-for
+   checks:
+     - xff_userid is yes
+   fail_message: use xff in userid is not configured
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.8xkuhie49jso
+
+ - validation: disable content ID values part 1 # same GUI panel and validations but different xpaths; also a sprawl of content validations at this xpath
+   object: ctd_1
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/ctd
+   checks:
+     - ctd_1.allow-http-range is no
+       fail_message: allow http partial response should be disabled
+     - ctd_1.tcp-bypass-exceed-queue is no
+       fail_message: Forward segments exceeding TCP content inspection queue should be disabled
+     - ctd_1.udp-bypass-exceed-queue is no
+       fail_message: Forward segments exceeding UDP content inspection queue should be disabled
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.j7zqw4vvcnjj
+
+ - validation: disable content ID values part 2 # same GUI panel and validations but different xpaths; multiple validations at this xpath
+   object: ctd_2
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/application
+   checks:
+     - ctd_2.bypass-exceed-queue is no
+       fail_message: Forward segments exceeding TCP App-ID inspection queue should be disabled
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.j7zqw4vvcnjj
+
+ - validation: device logging and reporting
+   object: dev_mgmt
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/management
+   checks:
+     - dev_mgmt.enable-log-high-dp-load is yes
+       fail_message: Enable Log on High DP Load should be enabled
+     - dev_mgmt.max-rows-in-csv-export is 1048576
+       fail_message: set max rows in log csv export to max 1,048,576
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.oart8gdmxkm
+
+# possible to use a value compare context like 'less than' or 'greater than'?
+# example: mgmt_auth.admin-lockout.failed-attempts is less than 10
+ - validation: management auth settings
+   object: mgmt_auth
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/management
+   checks:
+     - mgmt_auth.api.key.lifetime is configured # in this case the value is a variable and focus is having a user setting; no practice for what the value should be
+       fail_message: set api key lifetime
+     - mgmt_auth.admin-lockout.failed-attempts is configured # config has a value of 5 min yet final value up to the user; mainly a check that something is here
+       fail_message: admin lockout after failed attempts should be configured
+     - mgmt_auth.admin-lockout.lockout-time is configured # again have to decide if valiation or more about having this or a specific value
+       fail_message: admin lockout time based on failed attempts should be configured
+     - mgmt_auth.idle-timeout is configured # again have to decide if valiation or more about having this or a specific value
+       fail_message: idle timeout should be configured
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.tzq1v2kxpu61
+
+# example of multi-nested checks: config blob, sub-blob, line items
+ - validation: wildfire device settings
+   object: wf_device
+   location: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/wildfire
+   checks:
+     - wf_device is configured # master level to see if this block is configured; then 2nd block of file size limits; then reporting checkboxes
+       fail_message: wildfire devices settings should be configured
+        - wf_device.file-size-limit is configured # focus on setting of max file sizes may be good enough; or a check and subsequent checks are a child if needed
+          fail_message: wildfire file size limits should be configured
+            - wf_device.file-size-limit.entry['archive'].size-limit is 10 # first one with an attribute reference in the object; using as example, new in 8.1/9.0
+              fail_message: archive file type size limit should be configured
+            - wf_device.file-size-limit.entry['linux'].size-limit is 2 # as above if wf_device not configured so it all but if configured check for new types
+              fail_message: linux file type size limit should be configured
+            - wf_device.file-size-limit.entry['script'].size-limit is 2000 # as above if wf_device not configured so it all but if configured check for new types
+              fail_message: script file type size limit should be configured
+        - wf_device.report-benign-file is yes
+          fail_message: wildfire reporting for benign verdicts should be configured
+        - wf_device.report-grayware-file is yes
+          fail_message: wildfire reporting for grayware verdicts should be configured    
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.h6azoslh8k1v
+
+
+
+# original examples not part of this validation; reference only
  - name: show_device_system
    cmd: show
-   xpath: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system
+   xpath: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system/update-schedule/statistics-service
    outputs:
      # capture all the xml elements found at the 'update-schedule' xpath and convert it into a python object
      - name: update_schedule_object
