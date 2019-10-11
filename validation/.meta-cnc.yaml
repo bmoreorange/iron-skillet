@@ -55,10 +55,10 @@ snippets:
    checks:
      - dyn_up_threats is configured
        fail_message: threat dynamic updates not configured
-     - dyn_up_threats.recurring child is every-30-mins
-       fail_message: threat dynamic updates should be checked every 30 minutes
-     - dyn_up_threats.recurring..action is download-and-install # again use double dot to check download-install for any time interval
-       fail_message: threat dynamic updates should be downloaded and installed
+        - dyn_up_threats.recurring child is every-30-mins
+          fail_message: threat dynamic updates should be checked every 30 minutes
+        - dyn_up_threats.recurring..action is download-and-install # again use double dot to check download-install for any time interval
+          fail_message: threat dynamic updates should be downloaded and installed
    link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.z8qeh5ujjdqn
 
  - validation: dynamic updates - wildfire
@@ -67,10 +67,10 @@ snippets:
    checks:
      - dyn_up_wf is configured
        fail_message: wildfire dynamic updates not configured
-     - dyn_up_wf.recurring child is every-min
-       fail_message: wildfire dynamic updates should be checked every minute
-     - dyn_up_threats.recurring..action is download-and-install
-       fail_message: wildfire dynamic updates should be downloaded and installed
+        - dyn_up_wf.recurring child is every-min
+          fail_message: wildfire dynamic updates should be checked every minute
+        - dyn_up_threats.recurring..action is download-and-install
+          fail_message: wildfire dynamic updates should be downloaded and installed
    link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.z8qeh5ujjdqn
 
  - validation: snmp version
@@ -97,7 +97,7 @@ snippets:
    checks:
      - ntp.primary-ntp-server.ntp-server-address is configured # can't use a double dot here the way xpath is created for primary and secondary
        fail_message: primary ntp server shoud be configured
-     - ntp.primary-ntp-server.ntp-server-address is configured
+     - ntp.secondary-ntp-server.ntp-server-address is configured
        fail_message: secondary ntp server should be configured
    link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.uo567en25r7l
 
