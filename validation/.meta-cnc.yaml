@@ -210,6 +210,20 @@ snippets:
           fail_message: wildfire reporting for grayware verdicts should be configured    
    link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.h6azoslh8k1v
 
+# this is a named object reference
+# name is denoted as <entry name='name of object'> instead of an element value
+# validation could be a for a single named entry or a set of entries in a set
+# application to security profiles, logging profile, etc differentiated by object name
+# security and decryption rules use the same format with name='something'
+ - validation: IronSkillet AV profile configured # check only for the name and not decoder settings
+   object: profile_av
+   location: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus
+   checks:
+     - profile_av.entry:name is 'Outbound-AV' # check for child with attribute name
+     - profile_av.entry:name is 'Inbound-AV' # for comparison this is another entry with a different name
+   fail_message: IronSkillet AV profiles are not configured
+   link: https://docs.google.com/document/d/1dQFsCrUcYy8QlPuRlw0xSW57TEmoFhnjNvyhStrOmmc/edit#heading=h.tdkx1vyyha99
+
 
 
 # original examples not part of this validation; reference only
